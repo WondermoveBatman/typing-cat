@@ -115,6 +115,26 @@ pub struct AccessibilityStatus {
 }
 
 #[tauri::command]
+pub fn save_stats(state: State<AppState>) -> Result<(), String> {
+    let stats = state.stats.lock().unwrap();
+    let db_guard = state.db.lock().unwrap();
+
+    if let Some(db) = db_guard.as_ref() {
+        let today = chrono::Local::now().format("%Y-%m-%d").to_string();
+
+        db.update_daily_stats(
+            &today,
+            stats.total_keystrokes as i64,
+            stats.printable_chars as i64,
+        ).map_err(|e| e.to_string())?;
+
+        Ok(())
+    } else {
+        Err("Database not initialized".to_string())
+    }
+}
+
+#[tauri::command]
 pub fn check_accessibility() -> AccessibilityStatus {
     #[cfg(target_os = "macos")]
     {
@@ -138,5 +158,63 @@ pub fn check_accessibility() -> AccessibilityStatus {
             granted: true, // Other platforms don't need special permission
             platform: "other".to_string(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::infrastructure::persistence::Database;
+
+    #[test]
+    fn test_save_stats_logic() {
+        // Test the save_stats logic by directly testing database integration
+        let temp_dir = std::env::temp_dir().join("keystroke-counter-test-save");
+        let _ = std::fs::remove_dir_all(&temp_dir);
+        std::fs::create_dir_all(&temp_dir).expect("Failed to create test dir");
+
+        let db = Database::new(&temp_dir).expect("Failed to create database");
+        let today = chrono::Local::now().format("%Y-%m-%d").to_string();
+
+        // Test saving stats
+        let result = db.update_daily_stats(&today, 100, 50);
+        assert!(result.is_ok(), "Should be able to save stats");
+
+        // Verify data was saved
+        let saved_stats = db.get_daily_stats(&today);
+        assert!(saved_stats.is_ok(), "Should be able to retrieve stats");
+
+        let saved = saved_stats.unwrap();
+        assert!(saved.is_some(), "Stats should exist");
+
+        let saved = saved.unwrap();
+        assert_eq!(saved.total_keystrokes, 100, "Keystrokes should match");
+        assert_eq!(saved.printable_chars, 50, "Chars should match");
+
+        std::fs::remove_dir_all(&temp_dir).expect("Failed to clean up");
+    }
+
+    #[test]
+    fn test_save_stats_incremental() {
+        // Test that stats accumulate correctly
+        let temp_dir = std::env::temp_dir().join("keystroke-counter-test-incremental");
+        let _ = std::fs::remove_dir_all(&temp_dir);
+        std::fs::create_dir_all(&temp_dir).expect("Failed to create test dir");
+
+        let db = Database::new(&temp_dir).expect("Failed to create database");
+        let today = chrono::Local::now().format("%Y-%m-%d").to_string();
+
+        // Save first batch
+        db.update_daily_stats(&today, 100, 50).expect("First save failed");
+
+        // Save second batch
+        db.update_daily_stats(&today, 50, 25).expect("Second save failed");
+
+        // Verify accumulated stats
+        let saved = db.get_daily_stats(&today).unwrap().unwrap();
+        assert_eq!(saved.total_keystrokes, 150, "Keystrokes should accumulate");
+        assert_eq!(saved.printable_chars, 75, "Chars should accumulate");
+
+        std::fs::remove_dir_all(&temp_dir).expect("Failed to clean up");
     }
 }

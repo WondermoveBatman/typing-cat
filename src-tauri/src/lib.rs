@@ -9,7 +9,7 @@ use infrastructure::tray::create_tray;
 use infrastructure::persistence::Database;
 use presentation::commands::{
     get_current_stats, get_daily_stats, get_weekly_stats, get_monthly_stats,
-    start_tracking, stop_tracking, is_tracking, check_accessibility,
+    start_tracking, stop_tracking, is_tracking, check_accessibility, save_stats,
 };
 use tauri::Manager;
 
@@ -71,6 +71,7 @@ pub fn run() {
             stop_tracking,
             is_tracking,
             check_accessibility,
+            save_stats,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

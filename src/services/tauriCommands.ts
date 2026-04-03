@@ -37,3 +37,7 @@ export interface AccessibilityStatus {
 export async function checkAccessibility(): Promise<AccessibilityStatus> {
   return invoke<AccessibilityStatus>("check_accessibility");
 }
+
+export async function saveStats(): Promise<void> {
+  await invoke("save_stats");
+}
