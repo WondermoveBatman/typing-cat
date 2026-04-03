@@ -6,10 +6,12 @@ mod state;
 
 use state::AppState;
 use infrastructure::tray::create_tray;
+use infrastructure::persistence::Database;
 use presentation::commands::{
     get_current_stats, get_daily_stats, get_weekly_stats, get_monthly_stats,
     start_tracking, stop_tracking, is_tracking, check_accessibility,
 };
+use tauri::Manager;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -20,6 +22,22 @@ pub fn run() {
         .plugin(tauri_plugin_positioner::init())
         .manage(AppState::new())
         .setup(|app| {
+            // Get app data directory
+            let app_data_dir = app.path().app_data_dir()
+                .expect("Failed to get app data dir");
+
+            // Create directory if not exists
+            std::fs::create_dir_all(&app_data_dir)
+                .expect("Failed to create app data directory");
+
+            // Initialize database
+            let db = Database::new(&app_data_dir)
+                .expect("Failed to initialize database");
+
+            // Update AppState with database
+            let state = app.state::<AppState>();
+            *state.db.lock().unwrap() = Some(db);
+
             // Create system tray
             create_tray(app.handle())?;
 

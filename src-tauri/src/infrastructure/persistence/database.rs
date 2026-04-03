@@ -86,3 +86,46 @@ impl Database {
         Ok(result)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_database_initialization() {
+        let temp_dir = std::env::temp_dir();
+        let test_dir = temp_dir.join("keystroke-counter-test");
+
+        // Clean up if exists
+        let _ = std::fs::remove_dir_all(&test_dir);
+
+        // Create test directory
+        std::fs::create_dir_all(&test_dir).expect("Failed to create test dir");
+
+        // Initialize database
+        let db = Database::new(&test_dir);
+        assert!(db.is_ok(), "Database initialization should succeed");
+
+        // Verify database file exists
+        let db_path = test_dir.join("typing_stats.db");
+        assert!(db_path.exists(), "Database file should exist");
+
+        // Verify database is usable
+        let db = db.unwrap();
+        let today = chrono::Local::now().format("%Y-%m-%d").to_string();
+        let result = db.update_daily_stats(&today, 10, 5);
+        assert!(result.is_ok(), "Should be able to update stats");
+
+        // Verify data was saved
+        let stats = db.get_daily_stats(&today);
+        assert!(stats.is_ok(), "Should be able to read stats");
+        let stats = stats.unwrap();
+        assert!(stats.is_some(), "Stats should exist");
+        let stats = stats.unwrap();
+        assert_eq!(stats.total_keystrokes, 10, "Keystrokes should match");
+        assert_eq!(stats.printable_chars, 5, "Chars should match");
+
+        // Clean up
+        std::fs::remove_dir_all(&test_dir).expect("Failed to clean up test dir");
+    }
+}
