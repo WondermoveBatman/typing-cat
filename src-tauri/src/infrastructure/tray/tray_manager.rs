@@ -7,6 +7,7 @@ use tauri::{
 };
 use tauri_plugin_positioner::{Position, WindowExt};
 use log::info;
+use chrono;
 
 pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     info!("Creating system tray");
@@ -59,7 +60,27 @@ pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
                     let _ = app.emit("stop-tracking", ());
                 }
                 "quit" => {
-                    info!("Quit clicked");
+                    info!("Quit clicked - saving stats before exit");
+
+                    // Save stats before exit
+                    if let Some(state) = app.try_state::<crate::state::AppState>() {
+                        let stats = state.stats.lock().unwrap();
+                        let db_guard = state.db.lock().unwrap();
+
+                        if let Some(db) = db_guard.as_ref() {
+                            let today = chrono::Local::now().format("%Y-%m-%d").to_string();
+                            if let Err(e) = db.update_daily_stats(
+                                &today,
+                                stats.total_keystrokes as i64,
+                                stats.printable_chars as i64,
+                            ) {
+                                log::error!("Failed to save stats on quit: {}", e);
+                            } else {
+                                info!("Stats saved successfully before exit");
+                            }
+                        }
+                    }
+
                     app.exit(0);
                 }
                 _ => {}
