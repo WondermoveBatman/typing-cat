@@ -2,6 +2,18 @@
 
 **macOS 전용** 메뉴바 타자 카운터 앱 - runcat에서 영감을 받아 제작
 
+## 설치 방법
+
+### GitHub Releases에서 다운로드
+
+1. [Releases](https://github.com/kissung/keystroke-counter/releases)에서 최신 `.dmg` 파일 다운로드
+2. DMG 파일을 열고 앱을 Applications 폴더로 드래그
+3. 처음 실행 시 **"확인되지 않은 개발자" 경고**가 표시됩니다
+4. 앱을 **우클릭 → 열기** 클릭
+5. 대화상자에서 **"열기"** 버튼 클릭
+
+> **참고**: 이 앱은 현재 Apple Developer 계정으로 서명되지 않았습니다. 위 방법으로 안전하게 실행할 수 있습니다.
+
 ## 기능
 
 - 실시간 타자 카운트
