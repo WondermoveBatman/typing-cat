@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import { useTypingStats } from "../../hooks/useTypingStats";
 import { checkAccessibility } from "../../services/tauriCommands";
 import { StatCard } from "./StatCard";
+import { BarChart, Bar, LineChart, Line, XAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
 export function Dashboard() {
-  const { currentStats, weeklyStats, isTracking, toggleTracking } = useTypingStats();
+  const { currentStats, weeklyStats, monthlyStats, activeTab, setActiveTab, isTracking, toggleTracking } = useTypingStats();
   const [accessibilityGranted, setAccessibilityGranted] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -27,6 +28,30 @@ export function Dashboard() {
     (sum, day) => sum + day.total_keystrokes,
     0
   );
+
+  // Custom Tooltip for Recharts
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length) {
+      const data = payload[0].payload;
+      return (
+        <div style={{
+          background: 'var(--bg-card)',
+          padding: '8px 12px',
+          borderRadius: '6px',
+          border: '1px solid var(--border)',
+          fontSize: '12px'
+        }}>
+          <div style={{ color: 'var(--text-secondary)', marginBottom: '4px' }}>
+            {new Date(data.date).toLocaleDateString('ko-KR')}
+          </div>
+          <div style={{ color: 'var(--text-primary)', fontWeight: '600' }}>
+            {formatNumber(data.total_keystrokes)} 타자
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
 
   return (
     <div className="dashboard">
@@ -89,30 +114,62 @@ export function Dashboard() {
         <span>{currentStats.is_session_active ? "타이핑 중..." : "대기 중"}</span>
       </div>
 
-      {weeklyStats.length > 0 && (
+      {(weeklyStats.length > 0 || monthlyStats.length > 0) && (
         <div className="weekly-chart">
-          <h3>주간 통계</h3>
-          <div className="chart-bars">
-            {weeklyStats.map((day) => {
-              const maxKeystrokes = Math.max(...weeklyStats.map((d) => d.total_keystrokes));
-              const height = maxKeystrokes > 0
-                ? (day.total_keystrokes / maxKeystrokes) * 100
-                : 0;
-
-              return (
-                <div key={day.date} className="chart-bar-container">
-                  <div
-                    className="chart-bar"
-                    style={{ height: `${height}%` }}
-                    title={`${day.date}: ${formatNumber(day.total_keystrokes)}`}
-                  />
-                  <span className="chart-label">
-                    {new Date(day.date).toLocaleDateString("ko-KR", { weekday: "short" })}
-                  </span>
-                </div>
-              );
-            })}
+          {/* Tab Buttons */}
+          <div className="chart-tabs">
+            <button
+              className={`tab-btn ${activeTab === 'weekly' ? 'active' : ''}`}
+              onClick={() => setActiveTab('weekly')}
+            >
+              주간
+            </button>
+            <button
+              className={`tab-btn ${activeTab === 'monthly' ? 'active' : ''}`}
+              onClick={() => setActiveTab('monthly')}
+            >
+              월간
+            </button>
           </div>
+
+          {/* Weekly Chart */}
+          {activeTab === 'weekly' && weeklyStats.length > 0 && (
+            <ResponsiveContainer width="100%" height={120}>
+              <BarChart data={weeklyStats}>
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={(d) => new Date(d).toLocaleDateString('ko-KR', { weekday: 'short' })}
+                  stroke="var(--text-secondary)"
+                  fontSize={10}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Bar dataKey="total_keystrokes" fill="#6366f1" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+
+          {/* Monthly Chart */}
+          {activeTab === 'monthly' && monthlyStats.length > 0 && (
+            <ResponsiveContainer width="100%" height={120}>
+              <LineChart data={monthlyStats}>
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={(d) => new Date(d).getDate().toString()}
+                  stroke="var(--text-secondary)"
+                  fontSize={10}
+                />
+                <Tooltip content={<CustomTooltip />} />
+                <Line
+                  type="monotone"
+                  dataKey="total_keystrokes"
+                  stroke="#6366f1"
+                  strokeWidth={2}
+                  dot={{ fill: '#6366f1', r: 3 }}
+                  activeDot={{ r: 5 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
         </div>
       )}
     </div>

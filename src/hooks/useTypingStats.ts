@@ -4,6 +4,7 @@ import { useStatsStore } from "../stores/statsStore";
 import {
   getCurrentStats,
   getWeeklyStats,
+  getMonthlyStats,
   startTracking,
   stopTracking,
   isTracking as checkIsTracking,
@@ -13,10 +14,14 @@ export function useTypingStats() {
   const {
     currentStats,
     weeklyStats,
+    monthlyStats,
+    activeTab,
     isTracking,
     isLoading,
     setCurrentStats,
     setWeeklyStats,
+    setMonthlyStats,
+    setActiveTab,
     setIsTracking,
     setIsLoading,
   } = useStatsStore();
@@ -44,6 +49,19 @@ export function useTypingStats() {
     }
   }, [setWeeklyStats, setIsLoading]);
 
+  // Fetch monthly stats
+  const fetchMonthlyStats = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const stats = await getMonthlyStats();
+      setMonthlyStats(stats);
+    } catch (error) {
+      console.error("Failed to fetch monthly stats:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [setMonthlyStats, setIsLoading]);
+
   // Toggle tracking
   const toggleTracking = useCallback(async () => {
     try {
@@ -66,6 +84,7 @@ export function useTypingStats() {
       setIsTracking(tracking);
       await fetchCurrentStats();
       await fetchWeeklyStats();
+      await fetchMonthlyStats();
     };
     init();
 
@@ -88,14 +107,18 @@ export function useTypingStats() {
       unlistenStart.then((fn) => fn());
       unlistenStop.then((fn) => fn());
     };
-  }, [fetchCurrentStats, fetchWeeklyStats, setIsTracking]);
+  }, [fetchCurrentStats, fetchWeeklyStats, fetchMonthlyStats, setIsTracking]);
 
   return {
     currentStats,
     weeklyStats,
+    monthlyStats,
+    activeTab,
     isTracking,
     isLoading,
     toggleTracking,
     fetchWeeklyStats,
+    fetchMonthlyStats,
+    setActiveTab,
   };
 }
