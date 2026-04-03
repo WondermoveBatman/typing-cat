@@ -2,5 +2,5 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 fn main() {
-    keystroke_counter_lib::run()
+    typing_cat_lib::run()
 }
