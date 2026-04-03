@@ -77,17 +77,23 @@ pub fn get_monthly_stats(state: State<AppState>) -> Vec<DailyStats> {
 pub fn start_tracking(state: State<AppState>) -> bool {
     info!("Starting keystroke tracking");
 
-    let mut tracking = state.is_tracking.lock().unwrap();
-    if *tracking {
-        return true; // Already tracking
+    // Set tracking flag
+    {
+        let mut tracking = state.is_tracking.lock().unwrap();
+        *tracking = true;
     }
 
-    *tracking = true;
-
-    // Start keyboard listener
-    let stats = state.stats.clone();
-    let is_tracking = state.is_tracking.clone();
-    let _rx = start_keyboard_listener(stats, is_tracking);
+    // Start keyboard listener only once (it runs indefinitely)
+    {
+        let mut listener_started = state.listener_started.lock().unwrap();
+        if !*listener_started {
+            let stats = state.stats.clone();
+            let is_tracking = state.is_tracking.clone();
+            start_keyboard_listener(stats, is_tracking);
+            *listener_started = true;
+            info!("Keyboard listener started for the first time");
+        }
+    }
 
     true
 }

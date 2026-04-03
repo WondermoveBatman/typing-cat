@@ -1,5 +1,5 @@
 use tauri::{
-    tray::{TrayIconBuilder, TrayIconEvent, MouseButton},
+    tray::{TrayIconBuilder, TrayIconEvent, MouseButton, MouseButtonState},
     menu::{MenuBuilder, MenuItemBuilder},
     Manager, Runtime, AppHandle, Emitter,
     WebviewWindowBuilder, WebviewUrl,
@@ -88,8 +88,12 @@ pub fn create_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
         })
         .on_tray_icon_event(|tray, event| {
             match event {
-                TrayIconEvent::Click { button: MouseButton::Left, .. } => {
-                    info!("Tray icon left clicked");
+                TrayIconEvent::Click {
+                    button: MouseButton::Left,
+                    button_state: MouseButtonState::Up,
+                    ..
+                } => {
+                    info!("Tray icon left clicked (released)");
                     let app = tray.app_handle();
                     show_stats_window(app);
                 }

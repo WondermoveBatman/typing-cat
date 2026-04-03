@@ -27,14 +27,6 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_positioner::init())
         .manage(AppState::new())
-        .on_window_event(|window, event| {
-            // Hide stats window when it loses focus (typical tray app behavior)
-            if window.label() == "stats" {
-                if let tauri::WindowEvent::Focused(false) = event {
-                    let _ = window.hide();
-                }
-            }
-        })
         .setup(|app| {
             // Get app data directory
             let app_data_dir = app.path().app_data_dir()

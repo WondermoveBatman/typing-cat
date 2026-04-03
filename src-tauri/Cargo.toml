@@ -25,7 +25,9 @@ serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 
 # Global keyboard hook (cross-platform)
-rdev = "0.5"
+# Using fork that fixes macOS TIS/TSM API threading crash
+# See: https://github.com/tauri-apps/tauri/discussions/7839
+rdev = { git = "https://github.com/fufesou/rdev" }
 
 # SQLite database
 rusqlite = { version = "0.31", features = ["bundled"] }
