@@ -6,7 +6,7 @@
 
 ### GitHub Releases에서 다운로드
 
-1. [Releases](https://github.com/batman/typing-cat/releases)에서 최신 `.dmg` 파일 다운로드
+1. [Releases](https://github.com/WondermoveBatman/typing-cat/releases)에서 최신 `.dmg` 파일 다운로드
 2. DMG 파일을 열고 앱을 Applications 폴더로 드래그
 3. 처음 실행 시 **"확인되지 않은 개발자" 경고**가 표시됩니다
 4. 앱을 **우클릭 → 열기** 클릭
