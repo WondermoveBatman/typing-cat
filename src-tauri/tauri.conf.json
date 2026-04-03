@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Keystroke Counter",
+  "productName": "Typing Cat",
   "version": "0.1.0",
-  "identifier": "com.kissung.keystroke-counter",
+  "identifier": "com.kissung.typing-cat",
   "build": {
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:1420",

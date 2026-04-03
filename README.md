@@ -1,4 +1,4 @@
-# Keystroke Counter
+# Typing Cat 🐱
 
 **macOS 전용** 메뉴바 타자 카운터 앱 - runcat에서 영감을 받아 제작
 
@@ -6,7 +6,7 @@
 
 ### GitHub Releases에서 다운로드
 
-1. [Releases](https://github.com/kissung/keystroke-counter/releases)에서 최신 `.dmg` 파일 다운로드
+1. [Releases](https://github.com/batman/typing-cat/releases)에서 최신 `.dmg` 파일 다운로드
 2. DMG 파일을 열고 앱을 Applications 폴더로 드래그
 3. 처음 실행 시 **"확인되지 않은 개발자" 경고**가 표시됩니다
 4. 앱을 **우클릭 → 열기** 클릭
