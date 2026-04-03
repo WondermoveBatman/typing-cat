@@ -110,8 +110,8 @@ fn show_stats_window<R: Runtime>(app: &AppHandle<R>) {
         } else {
             let _ = window.show();
             let _ = window.set_focus();
-            // Position near tray icon
-            let _ = window.as_ref().window().move_window(Position::TrayCenter);
+            // Position near tray icon (TopRight instead of TrayCenter to avoid panic)
+            let _ = window.as_ref().window().move_window(Position::TopRight);
         }
         return;
     }
@@ -131,7 +131,7 @@ fn show_stats_window<R: Runtime>(app: &AppHandle<R>) {
     .visible(true)
     .build()
     {
-        // Position near tray icon
-        let _ = window.as_ref().window().move_window(Position::TrayCenter);
+        // Position near tray icon (TopRight instead of TrayCenter to avoid panic)
+        let _ = window.as_ref().window().move_window(Position::TopRight);
     }
 }
